@@ -6,6 +6,10 @@ import pytz
 import json
 import sqlite3
 import os
+from bs4 import BeautifulSoup
+import urllib.request, urllib.parse, urllib.error
+import ssl
+
 
 def get_datetimes():
     days = {}
@@ -58,6 +62,24 @@ def get_tweet_counts(query, datetimes, date):
         tweet_counts[end_time_est] = (counts.data)[0]['tweet_count']
     return tweet_counts
 
+def get_netflix_top_10(date):
+    url = 'https://top10.netflix.com/tv?week=' + date
+    ctx = ssl.create_default_context()
+    ctx.check_hostname = False
+    ctx.verify_mode = ssl.CERT_NONE
+    html = urllib.request.urlopen(url, context=ctx).read()
+    soup = BeautifulSoup(html, 'html.parser')
+
+    titles = []
+    table = soup.find_all('tbody')
+    shows = (table[0]).find_all('tr')
+    for show in shows:
+        attributes = show.find_all('td')
+        titles.append(attributes[1].text)
+    return titles
+
+
+
 #dates = get_datetimes()
 #queries = ['Netflix OR NetflixT10 OR YouS4 OR WednesdayS1']
 
@@ -98,7 +120,7 @@ def create_and_add_to_database(database_name):
         cur.execute('INSERT INTO NetflixTweetsAndStocks (datetime, stockchange, tweets) VALUES (?,?,?)', (str(time), stocks[time], tweet[time]))
     conn.commit()
 
-create_and_add_to_database('test.db')
+# create_and_add_to_database('test.db')
 
 
 
