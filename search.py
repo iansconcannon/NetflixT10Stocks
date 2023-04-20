@@ -79,7 +79,7 @@ def get_netflix_top_10(date):
         titles.append(attributes[1].text)
     return titles
 
-def twitter_tags(titles):
+def twitter_tag(titles):
     d = {}
     for title in titles:
         i = title.rfind(":")
@@ -88,6 +88,25 @@ def twitter_tags(titles):
         new_title = new_title.replace(":", "")
         d[title] = new_title
     return d
+
+def make_twitter_query(bases):
+    count = 0
+    tags = []
+    for base in bases:
+        s = "#" + bases[base] + "Netflix"
+        tags.append(s)
+    query = tags[0]
+    count += len(query)
+    for tag in tags[1:]:
+        s = " OR " + tag
+        if (len(s) + count < 512):
+            count += len(s)
+            query += s
+        else:
+            return query
+    return query
+
+
 
 #dates = get_datetimes()
 #queries = ['Netflix OR NetflixT10 OR YouS4 OR WednesdayS1']
@@ -132,8 +151,11 @@ def create_and_add_to_database(database_name):
 # create_and_add_to_database('test.db')
 lst = get_netflix_top_10("2023-04-16")
 print(lst)
-d = twitter_tags(lst)
+d = twitter_tag(lst)
 print(d)
+s = make_twitter_query(d)
+print(s)
+
 
 
 
