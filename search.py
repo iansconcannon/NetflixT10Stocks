@@ -81,29 +81,53 @@ def get_netflix_top_10(date):
 
 def twitter_tag(titles):
     d = {}
+    regex = 'Season (\d+)'
     for title in titles:
+        lst = []
         i = title.rfind(":")
         new_title = title[:i]
         new_title = new_title.replace(" ", "")
         new_title = new_title.replace(":", "")
-        d[title] = new_title
+        lst.append("#"+new_title+"Netflix")
+        match = re.search(regex, title)
+        if match:
+            sNumber = match.group(1)
+            num = int(sNumber)
+            if num > 1:
+                lst.append("#"+new_title+"S"+sNumber)
+                lst.append("#"+new_title+"Season"+sNumber)
+        d[title] = lst
     return d
 
-def make_twitter_query(bases):
-    count = 0
-    tags = []
-    for base in bases:
-        s = "#" + bases[base] + "Netflix"
-        tags.append(s)
-    query = tags[0]
-    count += len(query)
-    for tag in tags[1:]:
-        s = " OR " + tag
-        if (len(s) + count < 512):
+def make_twitter_query(tags):
+    query = tags[next(iter(tags))][0]
+    count = len(query)
+
+    for title in tags: #adds all #[Name]Netflix tags
+        s = " OR " + tags[title][0]
+        if (count + len(s) < 512):
             count += len(s)
             query += s
         else:
             return query
+
+    for title in tags: #adds all #[Name]S[#]
+        if len(tags[title]) > 1:
+            s = " OR " + tags[title][1]
+            if (count + len(s) < 512):
+                count += len(s)
+                query += s
+            else:
+                return query
+    
+    for title in tags: #adds all #[Name]Season[#]
+        if len(tags[title]) > 2:
+            s = " OR " + tags[title][2]
+            if (count + len(s) < 512):
+                count += len(s)
+                query += s
+            else:
+                return query
     return query
 
 
@@ -150,11 +174,12 @@ def create_and_add_to_database(database_name):
 
 # create_and_add_to_database('test.db')
 lst = get_netflix_top_10("2023-04-16")
-print(lst)
+# print(lst)
 d = twitter_tag(lst)
-print(d)
+# print(d)
 s = make_twitter_query(d)
 print(s)
+print(len(s))
 
 
 
