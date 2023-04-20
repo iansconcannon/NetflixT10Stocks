@@ -130,6 +130,12 @@ def make_twitter_query(tags):
                 return query
     return query
 
+def test_twitter_query(query):
+    client = tweepy.Client(bearer_token=config.BEARER_TOKEN)
+    counts = client.get_recent_tweets_count(query=query, start_time="2023-04-19T09:45:00Z", end_time="2023-04-19T10:15:00Z")
+    tweet_counts = (counts.data)[0]['tweet_count']
+    return tweet_counts
+
 
 
 #dates = get_datetimes()
@@ -177,9 +183,11 @@ lst = get_netflix_top_10("2023-04-16")
 # print(lst)
 d = twitter_tag(lst)
 # print(d)
-s = make_twitter_query(d)
-print(s)
-print(len(s))
+query = make_twitter_query(d)
+print(query)
+print(len(query))
+tweet_counts = test_twitter_query(query)
+print(tweet_counts)
 
 
 
