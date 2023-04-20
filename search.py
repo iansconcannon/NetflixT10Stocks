@@ -9,6 +9,7 @@ import os
 from bs4 import BeautifulSoup
 import urllib.request, urllib.parse, urllib.error
 import ssl
+import re
 
 
 def get_datetimes():
@@ -78,7 +79,15 @@ def get_netflix_top_10(date):
         titles.append(attributes[1].text)
     return titles
 
-
+def twitter_tags(titles):
+    d = {}
+    for title in titles:
+        i = title.rfind(":")
+        new_title = title[:i]
+        new_title = new_title.replace(" ", "")
+        new_title = new_title.replace(":", "")
+        d[title] = new_title
+    return d
 
 #dates = get_datetimes()
 #queries = ['Netflix OR NetflixT10 OR YouS4 OR WednesdayS1']
@@ -121,7 +130,10 @@ def create_and_add_to_database(database_name):
     conn.commit()
 
 # create_and_add_to_database('test.db')
-
+lst = get_netflix_top_10("2023-04-16")
+print(lst)
+d = twitter_tags(lst)
+print(d)
 
 
 
