@@ -54,9 +54,14 @@ def make_stock_chart(conn, cur):
         ax.bar(down_one.index, down_one.high-down_one.open, width2, bottom=down_one.open, color=col2)
         ax.bar(down_one.index, down_one.low-down_one.close, width2, bottom=down_one.close, color=col2)
         times = data[dates[i - 1]][1]
-        ax.set_xticks(range(25), times)
-        ax.grid()
-    plot.show()
+        ax.set_xticks(range(25), times, fontsize=5, rotation = 90)
+        ax.yaxis.grid()
+        ax.title.set_text(f'Netflix Stock on {dates[i - 1]}')
+    fig.tight_layout(pad=2)
+    fig.supxlabel('Time (EST)')
+    fig.supylabel('Stock Price (USD)')
+    fig.suptitle('Netflix Stock Candle Chart for the Last 4 Open Market Days', fontsize=14, y=0.99)
+    plot.savefig('NetflixStockChart.png')
 
 
 
