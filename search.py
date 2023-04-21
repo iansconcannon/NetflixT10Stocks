@@ -87,8 +87,10 @@ def twitter_tag(titles):
         lst = []
         i = title.rfind(":")
         new_title = title[:i]
-        new_title = new_title.replace(" ", "")
         new_title = new_title.replace(":", "")
+        #title_no_and = new_title.replace("and", "")
+        lst.append(new_title)
+        new_title = new_title.replace(" ", "")
         lst.append("#"+new_title+"Netflix")
         match = re.search(regex, title)
         if match:
@@ -98,24 +100,38 @@ def twitter_tag(titles):
                 lst.append("#"+new_title+"S"+sNumber)
                 lst.append("#"+new_title+"Season"+sNumber)
         d[title] = lst
+    # print(d)
     return d
 
-s = 'Netflix (You OR Outer Banks OR) OR tags...'
-
 def make_twitter_query(tags):
-    query = tags[next(iter(tags))][0]
+    first_title = tags[next(iter(tags))][0]
+    query = "Netflix (\"" + first_title + "\""
     count = len(query)
 
     for title in tags: #adds all #[Name]Netflix tags
-        s = " OR " + tags[title][0]
+        if tags[title][0] == first_title:
+            continue
+        s = " OR \"" + tags[title][0] + "\""
         if (count + len(s) < 512):
             count += len(s)
             query += s
         else:
+            query += ")"
             return query
+    
+    query += ")"
+
+    for title in tags: #adds all #[Name]Netflix tags
+        if len(tags[title]) > 1:
+            s = " OR " + tags[title][1]
+            if (count + len(s) < 512):
+                count += len(s)
+                query += s
+            else:
+                return query
 
     for title in tags: #adds all #[Name]S[#]
-        if len(tags[title]) > 1:
+        if len(tags[title]) > 2:
             s = " OR " + tags[title][1]
             if (count + len(s) < 512):
                 count += len(s)
@@ -124,7 +140,7 @@ def make_twitter_query(tags):
                 return query
     
     for title in tags: #adds all #[Name]Season[#]
-        if len(tags[title]) > 2:
+        if len(tags[title]) > 3:
             s = " OR " + tags[title][2]
             if (count + len(s) < 512):
                 count += len(s)
@@ -172,8 +188,12 @@ def create_and_add_to_database(database_name):
         cur.execute('INSERT INTO NetflixStocks (datetime, open, close, high, low) VALUES (?,?,?,?,?)', (str(time), stocks[time][0], stocks[time][1], stocks[time][2], stocks[time][3]))
     conn.commit()
 
-create_and_add_to_database('test.db')
-
+#create_and_add_to_database('test.db')
+titles = get_netflix_top_10("2023-04-19")
+# print(titles)
+tags = twitter_tag(titles)
+query = make_twitter_query(tags)
+print(query)
 
     
     
