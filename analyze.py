@@ -42,6 +42,8 @@ def make_stock_chart(cur):
         ax = fig.add_subplot(2, 2, i)
         col1 = 'green'
         col2 = 'red'
+        col1 = 'green'
+        col2 = 'red'
         width = .3
         width2 = .03
         stocks_one = pandas.DataFrame(data[dates[i - 1]][0])
@@ -62,11 +64,6 @@ def make_stock_chart(cur):
     fig.supylabel('Stock Price (USD)')
     fig.suptitle('Netflix Stock Candle Chart for the Last 4 Open Market Days', fontsize=14, y=0.99)
     plot.savefig('NetflixStockChart.png')
-
-
-
-
-    
 
 
 def make_volatility_chart(cur, f):
