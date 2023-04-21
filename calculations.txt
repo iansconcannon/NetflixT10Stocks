@@ -1,0 +1,13 @@
+VOLATILITY CHART CALCULATIONS:
+
+Sum of tweets on 1 most recent day: 1368
+Sum of tweets on 2 most recent day: 2186
+Sum of tweets on 3 most recent day: 3972
+Sum of tweets on 4 most recent day: 4852
+
+CORRELATION CHART CALCULATIONS:
+
+Average amount of tweets for 1 most recent day: 54
+Average amount of tweets for 2 most recent day: 87
+Average amount of tweets for 3 most recent day: 158
+Average amount of tweets for 4 most recent day: 194

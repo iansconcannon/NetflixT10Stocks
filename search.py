@@ -200,7 +200,7 @@ def create_and_add_to_database(database_name):
         t += 1
     conn.commit()
 
-create_and_add_to_database('test.db')
+create_and_add_to_database('netflix.db')
 
     
     
