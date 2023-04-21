@@ -77,13 +77,12 @@ def make_volatility_chart(conn, cur):
 
 def make_pos_neg_volatility_chart(conn, cur):
     # same as above except no absolute value
-    cur.execute(f'''SELECT AVG(tweets) FROM NetflixTweets''')
     data = {}
 
     for day in range(1, 5):
-        cur.execute(f'''SELECT AVG(tweets) FROM NetflixTweets Join Date ON Date.dateID = {day}''')
+        cur.execute(f'''SELECT AVG(NetflixTweets.tweets) FROM NetflixTweets JOIN Times ON NetflixTweets.timeID = Times.timeID 
+                        Join Date ON Times.dateID = Date.dateID WHERE Date.dateID = {day}''')
         avg = int(cur.fetchone()[0])
-        print(avg)
         # needs stock open - stock close
         stock_diff = []
         # needs num tweets - avg
@@ -93,18 +92,33 @@ def make_pos_neg_volatility_chart(conn, cur):
 
         date = ''
 
-        cur.execute(f'''SELECT NetflixStocks.open, NetflixStocks.close, NetflixTweets.tweets,
-        Times.datetime From NetflixStocks, Times JOIN NetflixTweets ON NetflixStocks.timeID = NetflixTweets.timeID
-        JOIN Date ON Date.dateID = {day}''')
+        # cur.execute(f'''SELECT NetflixStocks.open, NetflixStocks.close, NetflixTweets.tweets,
+        # Times.datetime From NetflixStocks JOIN NetflixTweets ON NetflixStocks.timeID = NetflixTweets.timeID
+        # JOIN Date ON Date.dateID = {day} JOIN Times on Times.timeID = NetflixStocks.timeID''')
+        cur.execute(f'''SELECT NetflixStocks.open, NetflixStocks.close, NetflixTweets.tweets, Times.datetime
+                    FROM NetflixStocks JOIN NetflixTweets ON NetflixStocks.timeID = NetflixTweets.timeID
+                    JOIN Times ON NetflixStocks.timeID = Times.timeID JOIN Date on Times.dateID = Date.dateID WHERE Date.dateID = {day}''')
 
         for row in cur:
+            print(row)
             date = row[3][:10]
-            stock_diff.append(row[0] - row[1])
-            tweet_vol.append(row[2] - avg)
+            stock_diff.append(round(row[0] - row[1], 2))
+            tweet_vol.append(round(row[2] - avg, 2))
             times.append(row[3][11:19])
-        data[date] = stock_diff, tweet_vol, times
+        data[date] = [stock_diff, tweet_vol, times]
 
-        print(data)
+    # First list is stock change, second list in twitter volatility, third list in times
+    print(data)
+    dates = []
+    for day in data:
+        dates.append(day)
+
+    fig = plot.figure()
+    x = range(1, 26)
+    for i in range(0, 4):
+        plot.plot(x, data[dates[i]][0], label = "Stock Change")
+        plot.plot(x, data[dates[i]][1], label = "Tweet Volatility")
+        plot.show()
 
     return
 
