@@ -37,7 +37,27 @@ def make_stock_chart(conn, cur):
     print(data)
     for day in data:
         dates.append(day)
-    
+    fig = plot.figure()
+    for i in range(1, 5):
+        ax = fig.add_subplot(2, 2, i)
+        col1 = 'red'
+        col2 = 'green'
+        width = .3
+        width2 = .03
+        stocks_one = pandas.DataFrame(data[dates[i - 1]][0])
+        up_one = stocks_one[stocks_one.close >= stocks_one.open]
+        down_one = stocks_one[stocks_one.close < stocks_one.open]
+        ax.bar(up_one.index, up_one.close-up_one.open, width, bottom=up_one.open, color=col1)
+        ax.bar(up_one.index, up_one.high-up_one.close, width2, bottom=up_one.close, color=col1)
+        ax.bar(up_one.index, up_one.low-up_one.open, width2, bottom=up_one.open, color=col1)
+        ax.bar(down_one.index, down_one.close-down_one.open, width, bottom=down_one.open, color=col2)
+        ax.bar(down_one.index, down_one.high-down_one.open, width2, bottom=down_one.open, color=col2)
+        ax.bar(down_one.index, down_one.low-down_one.close, width2, bottom=down_one.close, color=col2)
+        times = data[dates[i - 1]][1]
+        ax.set_xticks(range(25), times)
+        ax.grid()
+    plot.show()
+
 
 
 
