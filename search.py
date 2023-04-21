@@ -64,6 +64,8 @@ def get_tweet_counts(query, datetimes, date):
         tweet_counts[end_time_est] = (counts.data)[0]['tweet_count']
     return tweet_counts
 
+# Takes a string date in the format YYYY-MM-DD
+# Returns a list of netflix's current top 10 most watched TV shows
 def get_netflix_top_10(date):
     url = 'https://top10.netflix.com/tv?week=' + date
     ctx = ssl.create_default_context()
@@ -80,6 +82,8 @@ def get_netflix_top_10(date):
         titles.append(attributes[1].text)
     return titles
 
+# Takes in a list of titles (gotten from above function)
+# Returns a dictionary where the key is the full title and the value is a list of different searches/tags
 def twitter_tag(titles):
     d = {}
     regex = 'Season (\d+)'
@@ -88,7 +92,6 @@ def twitter_tag(titles):
         i = title.rfind(":")
         new_title = title[:i]
         new_title = new_title.replace(":", "")
-        #title_no_and = new_title.replace("and", "")
         lst.append(new_title)
         new_title = new_title.replace(" ", "")
         lst.append("#"+new_title+"Netflix")
@@ -103,6 +106,8 @@ def twitter_tag(titles):
     # print(d)
     return d
 
+# Takes a dictionary of tags with different searches (gotten from above function)
+# Returns a string query to use with Twitter's API
 def make_twitter_query(tags):
     first_title = tags[next(iter(tags))][0]
     query = "Netflix (\"" + first_title + "\""
@@ -190,7 +195,6 @@ def create_and_add_to_database(database_name):
 
 #create_and_add_to_database('test.db')
 titles = get_netflix_top_10("2023-04-19")
-# print(titles)
 tags = twitter_tag(titles)
 query = make_twitter_query(tags)
 print(query)
