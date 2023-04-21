@@ -95,7 +95,7 @@ def make_pos_neg_volatility_chart(conn, cur):
 
         cur.execute(f'''SELECT NetflixStocks.open, NetflixStocks.close, NetflixTweets.tweets,
         Times.datetime From NetflixStocks JOIN NetflixTweets ON NetflixStocks.timeID = NetflixTweets.timeID
-        Where Date.dateID = {day}''')
+        JOIN Date ON Date.dateID = {day}''')
 
         for row in cur:
             date = row[3][:10]
