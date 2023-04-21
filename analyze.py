@@ -71,7 +71,36 @@ def make_volatility_chart(conn, cur):
     return
 
 def make_pos_neg_volatility_chart(conn, cur):
-    # same as above excpet no absolute value
+    # same as above except no absolute value
+    cur.execute(f'''SELECT AVG(tweets) FROM NetflixTweets''')
+    data = {}
+
+    for day in range(1, 5):
+        cur.execute(f'''SELECT AVG(tweets) FROM NetflixTweets Join Date ON Date.dateID = {day}''')
+        avg = int(cur.fetchone()[0])
+        print(avg)
+        # needs stock open - stock close
+        stock_diff = []
+        # needs num tweets - avg
+        tweet_vol = []
+        # needs times
+        times = []
+
+        date = ''
+
+        cur.execute(f'''SELECT NetflixStocks.open, NetflixStocks.close, NetflixTweets.tweets,
+        Times.datetime From NetflixStocks JOIN NetflixTweets ON NetflixStocks.timeID = NetflixTweets.timeID
+        Where Date.dateID = {day}''')
+
+        for row in cur:
+            date = row[3][:10]
+            stock_diff.append(row[0] - row[1])
+            tweet_vol.append(row[2] - avg)
+            times.append(row[3][11:19])
+        data[date] = stock_diff, tweet_vol, times
+
+        print(data)
+
     return
 
 def create_charts(conn, cur):
@@ -81,4 +110,5 @@ def create_charts(conn, cur):
 
 
 
-make_stock_chart(conn, cur)
+# make_stock_chart(conn, cur)
+make_pos_neg_volatility_chart(conn, cur)
