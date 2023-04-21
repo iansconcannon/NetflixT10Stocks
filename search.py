@@ -3,7 +3,6 @@ import config
 import yfinance
 from datetime import datetime, timedelta
 import pytz
-import json
 import sqlite3
 import os
 from bs4 import BeautifulSoup
@@ -159,24 +158,31 @@ def create_and_add_to_database(database_name):
     conn = sqlite3.connect(path+'/'+database_name)
     cur = conn.cursor()
     
-    cur.execute('CREATE TABLE IF NOT EXISTS NetflixTweets (datetime TEXT PRIMARY KEY, tweets INT)')
-    cur.execute('CREATE TABLE IF NOT EXISTS NetflixStocks (datetime TEXT PRIMARY KEY, open FLOAT, close FLOAT, high FLOAT, low FLOAT)')
+    cur.execute('CREATE TABLE IF NOT EXISTS Times (timeID INT PRIMARY KEY, datetime TEXT, dateID INT)')
+    cur.execute('CREATE TABLE IF NOT EXISTS Date (dateID INT PRIMARY KEY, date TEXT)')
+    cur.execute('CREATE TABLE IF NOT EXISTS NetflixTweets (timeID INT PRIMARY KEY, tweets INT)')
+    cur.execute('CREATE TABLE IF NOT EXISTS NetflixStocks (timeID INT PRIMARY KEY, open FLOAT, close FLOAT, high FLOAT, low FLOAT)')
 
     datetimes = get_datetimes()
 
     unused = False
     first = True
+    t = 1
+    d = 1
     for date in datetimes:
         if first == True:
-            recent = date
+            recent = date[0]
             first = False
-        cur.execute(f'SELECT COUNT(*) FROM NetflixTweets WHERE "{str(datetimes[date][1])}" = datetime')
+        cur.execute(f'SELECT COUNT(*) FROM Times WHERE "{t}" = timeID')
         for row in cur:
             if row[0] == 0:
                 today = date
                 unused = True
+                cur.execute(f'INSERT INTO Date (dateID, date) VALUES (?,?)', (d, str(date)))
         if unused == True:
             break
+        t += 25
+        d += 1
 
     if unused == False:
         return
@@ -184,20 +190,17 @@ def create_and_add_to_database(database_name):
     titles = get_netflix_top_10(str(recent))
     tags = twitter_tag(titles)
     query = make_twitter_query(tags)
-    query = "Netflix (You OR Outer Banks OR Wednesday)"
     current = datetimes[today][1:-1]
     stocks = get_netflix_stock(datetimes)
     tweet = get_tweet_counts(query, datetimes, today)
     for time in current:
-        cur.execute('INSERT INTO NetflixTweets (datetime, tweets) VALUES (?,?)', (str(time), tweet[time]))
-        cur.execute('INSERT INTO NetflixStocks (datetime, open, close, high, low) VALUES (?,?,?,?,?)', (str(time), stocks[time][0], stocks[time][1], stocks[time][2], stocks[time][3]))
+        cur.execute('INSERT INTO Times (timeID, datetime, dateID) VALUES (?,?,?)', ((t), str(time), d))
+        cur.execute('INSERT INTO NetflixTweets (timeID, tweets) VALUES (?,?)', ((t), tweet[time]))
+        cur.execute('INSERT INTO NetflixStocks (timeID, open, close, high, low) VALUES (?,?,?,?,?)', ((t), stocks[time][0], stocks[time][1], stocks[time][2], stocks[time][3]))
+        t += 1
     conn.commit()
 
-#create_and_add_to_database('test.db')
-titles = get_netflix_top_10("2023-04-19")
-tags = twitter_tag(titles)
-query = make_twitter_query(tags)
-print(query)
+create_and_add_to_database('test.db')
 
     
     
