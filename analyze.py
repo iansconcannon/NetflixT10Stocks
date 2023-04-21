@@ -3,7 +3,7 @@ import os
 import pandas
 import matplotlib.pyplot as plot
 
-database_name = 'test.db'
+database_name = 'netflix.db'
 path = os.path.dirname(os.path.abspath(__file__))
 conn = sqlite3.connect(path+'/'+database_name)
 cur = conn.cursor()
